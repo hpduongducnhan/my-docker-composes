@@ -1,0 +1,39 @@
+# Copyright VMware, Inc.
+# SPDX-License-Identifier: APACHE-2.0
+version: '3.8'
+
+
+x-restart-policy: &restart_policy
+  restart: always
+  networks:
+    - lab_rabbitmq_network
+  # environment:
+  #   TZ: "Asia/Ho_Chi_Minh"
+
+
+networks:
+  lab_rabbitmq_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${BRIDGE_SUBNET:-192.168.160.0/24}
+
+services:
+  rabbitmq:
+    image: docker.io/bitnami/rabbitmq:3.12
+    ports:
+      - '4369:4369'
+      - '5551:5551'
+      - '5552:5552'
+      - '5672:5672'
+      - '25672:25672'
+      - '15672:15672'
+    environment:
+      - RABBITMQ_SECURE_PASSWORD=yes
+      - RABBITMQ_LOGS=-
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_USERNAME=user
+      - RABBITMQ_PASSWORD=bitnami
+    volumes:
+      - './data/:/bitnami/rabbitmq/mnesia'
+

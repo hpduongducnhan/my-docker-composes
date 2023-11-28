@@ -1,0 +1,69 @@
+version: '3.8'
+
+
+x-restart-policy: &restart_policy
+  restart: always
+  networks:
+    - lab_elk_network
+  # env_file: './.env'
+  # environment:
+  #   TZ: "Asia/Ho_Chi_Minh"
+
+
+services:
+  elasticsearch:
+    <<: *restart_policy
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  
+  logstash:
+    <<: *restart_policy
+    image: docker.elastic.co/logstash/logstash:7.15.1
+    container_name: logstash
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5600:5600"
+
+  kibana:
+    <<: *restart_policy
+    image: docker.elastic.co/kibana/kibana:7.15.1
+    container_name: kibana
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+
+  filebeat:
+    <<: *restart_policy
+    image: docker.elastic.co/beats/filebeat:7.15.1
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["filebeat", "-e", "--strict.perms=false"]
+
+
+networks:
+  lab_elk_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.110.0/24

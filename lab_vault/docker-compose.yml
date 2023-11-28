@@ -1,0 +1,32 @@
+version: '3.8'
+
+
+x-restart-policy: &restart_policy
+  restart: always
+  networks:
+    - lab_vault_network
+  # environment:
+  #   TZ: "Asia/Ho_Chi_Minh"
+
+
+networks:
+  lab_vault_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${BRIDGE_SUBNET:-192.168.120.0/24}
+
+
+services:
+  vault-server:
+    image: hashicorp/vault:${VAULT_VERSION:-latest}
+    container_name: ${VAULT_CONTAINER_NAME:-vault_server}
+    ports:
+      - "${VAULT_PORT:-8200}:8200"
+    environment:
+      # VAULT_DEV_LISTEN_ADDRESS: "${VAULT_LISTEN:-http://0.0.0.0:8200}"
+      VAULT_DEV_ROOT_TOKEN_ID: "${VAULT_TOKEN:-vault_plaintext_root_token}"
+      VAULT_API_ADDR: "${VAULT_LISTEN:-http://0.0.0.0:8200}"
+    cap_add:
+      - IPC_LOCK
+    

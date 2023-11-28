@@ -1,0 +1,34 @@
+version: '3.8'
+
+
+x-restart-policy: &restart_policy
+  restart: always
+  networks:
+    - lab_sonar_network
+  # environment:
+  #   TZ: "Asia/Ho_Chi_Minh"
+
+
+networks:
+  lab_sonar_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${BRIDGE_SUBNET:-192.168.140.0/24}
+
+
+services:
+  sonarqube:
+    image: sonarqube:${SONAR_VERSION:-community}
+    container_name: ${SONAR_CONTAINER_NAME:-sonarqube}
+    ports:
+      - "${SONAR_PORT:-9700}:9000"
+    environment:
+      SONAR_JDBC_USERNAME: ${SONAR_USERNAME:-sonar}
+      SONAR_JDBC_PASSWORD: ${SONAR_PASSWORD:-password}
+    volumes:
+      # - ./data/sonarqube/data:/opt/sonarqube/data
+      # - ./data/sonarqube/extensions:/opt/sonarqube/extensions
+      - ./data/sonarqube/logs:/opt/sonarqube/logs
+
+    
