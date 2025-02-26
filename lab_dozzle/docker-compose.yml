@@ -35,8 +35,6 @@ services:
     environment:
       - DOZZLE_AUTH_TTL=48h
       - DOZZLE_AUTH_PROVIDER=simple
-
-      - DOZZLE_REMOTE_AGENT=agent:7007
-    #  - DOZZLE_REMOTE_AGENT=agent:7007 - add multiple agent as you need
+      - DOZZLE_REMOTE_AGENT=${DOZZLE_AGENTS:-agent_01:7007,agent_02:7007}
     ports:
       - 8080:8080 # Dozzle UI port
