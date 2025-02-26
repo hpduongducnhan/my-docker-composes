@@ -1,0 +1,36 @@
+version: '3.8'
+
+
+x-restart-policy: &restart_policy
+  restart: always
+  networks:
+    - lab_dozzle_network
+  # environment:
+  #   TZ: "Asia/Ho_Chi_Minh"
+
+
+networks:
+  lab_dozzle_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${BRIDGE_SUBNET:-192.168.181.0/24}
+
+services:
+  dozzle-agent:
+    image: amir20/dozzle:latest
+    container_name: dozzle-agent
+    command: agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 7007:7007
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    environment:
+      - DOZZLE_REMOTE_AGENT=agent:7007
+    #  - DOZZLE_REMOTE_AGENT=agent:7007 - add multiple agent as you need
+    ports:
+      - 8080:8080 # Dozzle UI port

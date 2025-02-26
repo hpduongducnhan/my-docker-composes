@@ -1,0 +1,77 @@
+version: '3.8'
+
+
+x-restart-policy: &restart_policy
+  restart: always
+  networks:
+    - lab_rabbitmq_cluster_network
+  # environment:
+  #   TZ: "Asia/Ho_Chi_Minh"
+
+
+networks:
+  lab_rabbitmq_cluster_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${BRIDGE_SUBNET:-192.168.182.0/24}
+
+services:
+  rabbitmq-01:
+    restart: always
+    image: rabbitmq:4-management
+    hostname: rabbitmq-01
+    container_name: ${RBMQ_NAME:-rabbitmq}_01
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "${RBMQ_COOKIE:-supersecretcookie}"
+      RABBITMQ_DEFAULT_USER: "${RBMQ_USER:-admin}"
+      RABBITMQ_DEFAULT_PASS: "${RBMQ_PASS:-admin}"
+      RABBITMQ_NODENAME: "rabbit@rabbitmq-01"
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # Management UI port
+    networks:
+      lab_rabbitmq_cluster_network:
+        aliases:
+          - rabbitmq-01
+
+  rabbitmq-02:
+    restart: always
+    image: rabbitmq:4-management
+    hostname: rabbitmq-02
+    container_name: ${RBMQ_NAME:-rabbitmq}_02
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "${RBMQ_COOKIE:-supersecretcookie}"
+      RABBITMQ_DEFAULT_USER: "${RBMQ_USER:-admin}"
+      RABBITMQ_DEFAULT_PASS: "${RBMQ_PASS:-admin}"
+      RABBITMQ_NODENAME: "rabbit@rabbitmq-02"
+    ports:
+      - "5673:5672" # AMQP protocol port
+      - "15673:15672" # Management UI port
+    depends_on:
+      - rabbitmq-01
+    networks:
+      lab_rabbitmq_cluster_network:
+        aliases:
+          - rabbitmq-02
+
+  rabbitmq-03:
+    restart: always
+    image: rabbitmq:4-management
+    hostname: rabbitmq-03
+    container_name: ${RBMQ_NAME:-rabbitmq}_03
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "${RBMQ_COOKIE:-supersecretcookie}"
+      RABBITMQ_DEFAULT_USER: "${RBMQ_USER:-admin}"
+      RABBITMQ_DEFAULT_PASS: "${RBMQ_PASS:-admin}"
+      RABBITMQ_NODENAME: "rabbit@rabbitmq-03"
+    ports:
+      - "5674:5672" # AMQP protocol port
+      - "15674:15672" # Management UI port
+    depends_on:
+      - rabbitmq-01
+      - rabbitmq-02
+    networks:
+      lab_rabbitmq_cluster_network:
+        aliases:
+          - rabbitmq-03

@@ -24,6 +24,25 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
 
+  pgbouncer:
+    <<: *restart_policy
+    image: edoburu/pgbouncer
+    container_name: pgbouncer
+    ports:
+      - "6432:6432" # PgBouncer listens on port 6432
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dev
+    volumes:
+      - ./pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini # Mount your config file here
+      - ./userlist.txt:/etc/pgbouncer/userlist.txt # Optional: mount userlist file if needed
+      - ./data/pgbouncer:/etc/pgbouncer
+    command: >
+      pgbouncer -u postgres /etc/pgbouncer/pgbouncer.ini
+    depends_on:
+      - postgres
+
   redis:
     <<: *restart_policy
     image: redis
@@ -45,6 +64,7 @@ services:
       - ./data/mongo:/data/db
     ports:
       - "27017:27017"
+
 
 
 networks:
