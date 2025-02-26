@@ -23,13 +23,19 @@ services:
     command: agent
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./auth_user.yml:/data/user.yml
     ports:
       - 7007:7007
 
   dozzle:
     image: amir20/dozzle:latest
     container_name: dozzle
+    volumes:
+      - ./auth_user.yml:/data/user.yml
     environment:
+      - DOZZLE_AUTH_TTL: 48h
+      - DOZZLE_AUTH_PROVIDER: simple
+
       - DOZZLE_REMOTE_AGENT=agent:7007
     #  - DOZZLE_REMOTE_AGENT=agent:7007 - add multiple agent as you need
     ports:
