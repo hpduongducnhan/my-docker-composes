@@ -20,3 +20,7 @@ docker-master-up:
 
 docker-master-down:
 	sudo docker compose down dozzle
+
+
+compose-down:
+	sudo docker compose down

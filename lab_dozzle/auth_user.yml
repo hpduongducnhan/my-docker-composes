@@ -5,8 +5,6 @@
 #
 # for example 
 #   docker run amir20/dozzle generate --name Admin --email me@email.net --password secret-password admin
-
-
 users:
   admin:
     email: admin@admin.com
